@@ -1,0 +1,31 @@
+sensor:
+  - platform: template
+    sensors:
+      flexispot_sit_or_stand:
+        friendly_name: Desk sit or stand
+        value_template: >-
+          {% if states('sensor.desk_height')|float > 85 and is_state('binary_sensor.ikea_motion_buero_occupancy','on') %}
+            stand_and_working
+          {% elif states('sensor.desk_height')|float <= 85 and is_state('binary_sensor.ikea_motion_buero_occupancy','on') %}
+            sit_and_working
+          {% elif states('sensor.desk_height')|float > 85 %}
+            stand
+          {% else %}
+            sit
+          {% endif %}
+
+  - platform: history_stats
+    name: desk work time sitting
+    entity_id: sensor.flexispot_sit_or_stand
+    state: "sit_and_working"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+  
+  - platform: history_stats
+    name: desk work time standing
+    entity_id: sensor.flexispot_sit_or_stand
+    state: "stand_and_working"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
